@@ -4,10 +4,14 @@ import os
 os.environ['HF_HOME'] = 'e:/Large data/qa data/hf_home/'
 os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
 
+# for jupiter notebook, does not work in plain python
+# from huggingface_hub import notebook_login
+# notebook_login()
+token = "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"
 
 import transformers
 
-# print(transformers.__version__)
+print(transformers.__version__)
 
 
 
@@ -18,14 +22,19 @@ model_checkpoint = "distilbert-base-uncased"
 batch_size = 16
 
 from datasets import load_dataset, load_metric
-
-
+import datasets
+print(datasets.__version__)
 
 
 
 datasets = load_dataset("squad_v2" if squad_v2 else "squad")
-
-exit()
+# datasets = load_dataset(
+#     "squad_v2",
+#     "squad_v2",
+#     cache_dir='e:/Large data/qa data/hf_home/',
+#     use_auth_token=None,
+# )
+# exit()
 
 print(datasets)
 print(datasets["train"][0])
@@ -198,15 +207,17 @@ model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
 
 # instantiate trainer
 model_name = model_checkpoint.split("/")[-1]
+print("Model name:", model_name)
 args = TrainingArguments(
     f"{model_name}-finetuned-squad",
     evaluation_strategy = "epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
-    num_train_epochs=3,
+    num_train_epochs=1, #1
     weight_decay=0.01,
     push_to_hub=True,
+    hub_token = token,
 )
 
 # data collator batches our processed examples together
