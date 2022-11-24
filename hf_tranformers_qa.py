@@ -214,7 +214,7 @@ args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
-    num_train_epochs=1, #1
+    num_train_epochs=1, #3
     weight_decay=0.01,
     push_to_hub=True,
     hub_token = token,
@@ -233,9 +233,20 @@ trainer = Trainer(
     tokenizer=tokenizer,
 )
 
-trainer.train()
+# trainer.train()
 
-trainer.save_model("test-squad-trained")
+# model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
+# model = RobertaForMaskedLM.from_pretrained("./saved/checkpoint-480000") # suggestion how to load model from
+# model = AutoModelForQuestionAnswering.from_pretrained("./distilbert-base-uncased-finetuned-squad/checkpoint-5500")
+# trainer = Trainer(
+#     model,
+#     args,
+#     train_dataset=tokenized_datasets["train"],
+#     eval_dataset=tokenized_datasets["validation"],
+#     data_collator=data_collator,
+#     tokenizer=tokenizer,
+# )
+# trainer.save_model("test-squad-trained")
 
 # evaluation model
 import torch
@@ -461,6 +472,9 @@ def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size=
 
     return predictions
 
+
+
+
 final_predictions = postprocess_qa_predictions(datasets["validation"], validation_features, raw_predictions.predictions)
 
 
@@ -471,9 +485,9 @@ if squad_v2:
 else:
     formatted_predictions = [{"id": k, "prediction_text": v} for k, v in final_predictions.items()]
 references = [{"id": ex["id"], "answers": ex["answers"]} for ex in datasets["validation"]]
-metric.compute(predictions=formatted_predictions, references=references)
-
-# trainer.push_to_hub()
+my_metrics = metric.compute(predictions=formatted_predictions, references=references)
+print("My metrics:", my_metrics)
+trainer.push_to_hub()
 
 
 
