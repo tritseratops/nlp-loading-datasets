@@ -88,13 +88,14 @@ def accuracy(model, ds, toker, num_reviews):
     if b_ix == num_reviews - 1:
       break
 
-    if lbl.item() != pred_class.item():
-      print("Test review as token IDs: ")
-      T.set_printoptions(threshold=100, edgeitems=3)
-      print(input_ids)
-      print("Review source: ")
-      words = toker.decode(input_ids[0])  # giant string
-      print_list(words.split(' '), 3, 3)
+    # if lbl.item() != pred_class.item():
+    print("Test review as token IDs: ")
+    T.set_printoptions(threshold=100, edgeitems=3)
+    print(input_ids)
+    print("Review source: ")
+    words = toker.decode(input_ids[0])  # giant string
+    print_list(words.split(' '), 3, 3)
+
   print("====================================================")
 
   acc = (n_correct * 1.0) / (n_correct + n_wrong)
@@ -139,15 +140,16 @@ def main():
   print("Done ")
 
   # 2. load tuned model wts and biases from file
-  print("\nLoading tuned model wts and biases ")
-  model.load_state_dict(T.load(".\\Models\\imdb_state.pt"))
-  model.eval()
-  print("Done ")
+  # print("\nLoading tuned model wts and biases ")
+  # model.load_state_dict(T.load(".\\Models\\imdb_state.pt"))
+  # model.eval()
+  # print("Done ")
 
   # 3. load training data used to create tuned model
   print("\nLoading test data from file into memory ")
-  test_texts, test_labels = \
-    read_imdb(".\\DataSmall\\aclImdb\\test")
+  # test_path = ".\\DataSmall\\aclImdb\\test"
+  test_path = "e:\\Large data\\qa data\\20221124_imdb\\aclImdb\\test"
+  test_texts, test_labels = read_imdb(test_path)
   print("Done ")
 
   # 4. tokenize the raw text data
