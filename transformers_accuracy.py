@@ -55,7 +55,7 @@ def print_list(lst, front, back):
 def accuracy(model, ds, toker, num_reviews):
   # item-by-item: good for debugging but slow
   n_correct = 0; n_wrong = 0
-  loader = DataLoader(ds, batch_size=1, shuffle=False)
+  loader = DataLoader(ds, batch_size=1, shuffle=True)
   for (b_ix, batch) in enumerate(loader):
     print("====================================================")
     print(str(b_ix) + "  ", end="")
@@ -150,6 +150,8 @@ def main():
   # test_path = ".\\DataSmall\\aclImdb\\test"
   test_path = "e:\\Large data\\qa data\\20221124_imdb\\aclImdb\\test"
   test_texts, test_labels = read_imdb(test_path)
+  print("0 in labels:", test_labels.count(0))
+  print("1 in labels:", test_labels.count(1))
   print("Done ")
 
   # 4. tokenize the raw text data
@@ -168,7 +170,7 @@ def main():
 
   # 6. compute classification accuracy
   print("\nComputing model accuracy on first 5 test data ")
-  acc = accuracy(model, test_dataset, tokenizer, num_reviews=5)
+  acc = accuracy(model, test_dataset, tokenizer, num_reviews=100)
   print("Accuracy = %0.4f " % acc)
 
   # print("\nComputing model accuracy (fast) on test data ")
