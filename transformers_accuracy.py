@@ -1,3 +1,4 @@
+# from here: https://visualstudiomagazine.com/Articles/2021/12/07/compute-ta-model-accuracy.aspx?Page=1
 # imdb_hf_02_eval.py
 # accuracy for tuned HF model for IMDB sentiment analysis
 # Python 3.7.6  PyTorch 1.8.0  HF 4.11.3  Windows 10
@@ -103,6 +104,7 @@ def accuracy(model, ds, toker, num_reviews):
   print("Wrong:   %4d " % n_wrong)
   return acc
 
+# wants 39GB RAM, crashes, OMG
 def accuracy_fast(model, ds):
   # all items at once: slightly faster but less clear
   loader = DataLoader(ds, batch_size=len(ds), shuffle=False)
@@ -173,6 +175,7 @@ def main():
   acc = accuracy(model, test_dataset, tokenizer, num_reviews=100)
   print("Accuracy = %0.4f " % acc)
 
+  # I need 39 GB for that
   # print("\nComputing model accuracy (fast) on test data ")
   # acc = accuracy_fast(model, test_dataset)
   # print("Accuracy = %0.4f " % acc)
