@@ -1,6 +1,9 @@
 from transformers import pipeline
 
 question_answerer = pipeline("question-answering")
+# question_answerer = pipeline("question-answering", model="distilgpt2")
+# question_answerer = pipeline("question-answering", model="distilgpt2")
+# question_answerer = pipeline("question-answering", "Mentatko/distilbert-base-uncased-finetuned-squad")
 # answer = question_answerer(
 #     question="Where do I work?",
 #     context="My name is Sylvain and I work at Hugging Face in Brooklyn",
