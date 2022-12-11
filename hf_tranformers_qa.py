@@ -248,6 +248,10 @@ trainer = Trainer(
 # )
 # trainer.save_model("test-squad-trained")
 
+# added from transformers course, did not tested yet
+# dir_to_save = 'e:/Large data/qa data/hf_home/my_model'
+# model.save_pretrained(dir_to_save)
+
 # evaluation model
 import torch
 
