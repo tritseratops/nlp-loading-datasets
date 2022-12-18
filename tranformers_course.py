@@ -44,23 +44,40 @@ os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
 # print(model(torch.tensor(input_ids)).logits)
 
 # 2022.12.16
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+# from transformers import AutoTokenizer, AutoModelForSequenceClassification
+# import torch
+#
+# checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+# model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+# tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+#
+# sequence1_ids = [[200, 200, 200]]
+# sequence2_ids = [[200, 200]]
+# batched_ids = [
+#     [200, 200, 200],
+#     [200, 200, tokenizer.pad_token_id],
+# ]
+# attention_mask = [
+#     [1, 1, 1],
+#     [1, 1, 0],
+# ]
+# print(model(torch.tensor(sequence1_ids)).logits)
+# print(model(torch.tensor(sequence2_ids)).logits)
+# print(model(torch.tensor(batched_ids), attention_mask=torch.tensor(attention_mask)).logits)
+
+# 2022.12.18
 import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
-model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+sequences = ["I've been waiting for a HuggingFace course my whole life.", "So have I!"]
 
-sequence1_ids = [[200, 200, 200]]
-sequence2_ids = [[200, 200]]
-batched_ids = [
-    [200, 200, 200],
-    [200, 200, tokenizer.pad_token_id],
-]
-attention_mask = [
-    [1, 1, 1],
-    [1, 1, 0],
-]
-print(model(torch.tensor(sequence1_ids)).logits)
-print(model(torch.tensor(sequence2_ids)).logits)
-print(model(torch.tensor(batched_ids), attention_mask=torch.tensor(attention_mask)).logits)
+tokens = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt")
+input_ids = tokens['input_ids']
+print(input_ids)
+ids = input_ids.tolist()
+print(ids)
+print([tokenizer.decode(sentence_ids) for sentence_ids in ids])
+output = model(**tokens)
