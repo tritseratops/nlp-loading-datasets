@@ -1,4 +1,5 @@
 import os
+
 os.environ['HF_HOME'] = 'e:/Large data/qa data/hf_home/'
 os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
 
@@ -66,18 +67,84 @@ os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
 # print(model(torch.tensor(batched_ids), attention_mask=torch.tensor(attention_mask)).logits)
 
 # 2022.12.18
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+# import torch
+# from transformers import AutoTokenizer, AutoModelForSequenceClassification
+#
+# checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+# tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+# model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+# sequences = ["I've been waiting for a HuggingFace course my whole life.", "So have I!"]
+#
+# tokens = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt")
+# input_ids = tokens['input_ids']
+# print(input_ids)
+# ids = input_ids.tolist()
+# print(ids)
+# print([tokenizer.decode(sentence_ids) for sentence_ids in ids])
+# output = model(**tokens)
 
-checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+# 2022.12.19
+# import torch
+# from transformers import AdamW, AutoTokenizer, AutoModelForSequenceClassification
+#
+# # Same as before
+# checkpoint = "bert-base-uncased"
+# tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+# model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+# sequences = [
+#     "I've been waiting for a HuggingFace course my whole life.",
+#     "This course is amazing!",
+# ]
+# batch = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt")
+#
+# # This is new
+# batch["labels"] = torch.tensor([1, 1])
+#
+# optimizer = AdamW(model.parameters())
+# loss = model(**batch).loss
+# loss.backward()
+# optimizer.step()
+
+# 2022.12.20
+from datasets import load_dataset
+
+raw_datasets = load_dataset("glue", "mrpc")
+print(raw_datasets)
+raw_train_dataset = raw_datasets["train"]
+print(raw_train_dataset[0])
+print(raw_train_dataset.features)
+
+from transformers import AutoTokenizer
+
+checkpoint = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
-sequences = ["I've been waiting for a HuggingFace course my whole life.", "So have I!"]
+tokenized_sentences1 = tokenizer(raw_datasets["train"]["sentence1"])
+tokenized_sentences2 = tokenizer(raw_datasets["train"]["sentence2"])
+inputs = tokenizer("This is the first sentence", "This is the second one")
+print(inputs)
+print(tokenizer.convert_ids_to_tokens(inputs["input_ids"]))
 
-tokens = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt")
-input_ids = tokens['input_ids']
-print(input_ids)
-ids = input_ids.tolist()
-print(ids)
-print([tokenizer.decode(sentence_ids) for sentence_ids in ids])
-output = model(**tokens)
+tokenized_dataset = tokenizer(
+    raw_datasets["train"]["sentence1"],
+    raw_datasets["train"]["sentence2"],
+    padding=True,
+    truncation=True
+)
+
+
+def tokenize_function(example):
+    return tokenizer(example["sentence1"], example["sentence2"], truncation=True)
+
+tokenized_datasets =raw_datasets.map(tokenize_function, batched=True)
+print(tokenized_datasets)
+
+from transformers import DataCollatorWithPadding
+
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
+samples = tokenized_datasets["train"][:8]
+samples = {k: v for k, v in samples.items() if k not in ["idx", "sentence1", "sentence2"]}
+print([len(x) for x in samples["input_ids"]])
+
+batch = data_collator(samples)
+print({k: v.shape for k, v in batch.items()})
