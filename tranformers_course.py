@@ -106,45 +106,113 @@ os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
 # optimizer.step()
 
 # 2022.12.20
+# from datasets import load_dataset
+#
+# raw_datasets = load_dataset("glue", "mrpc")
+# print(raw_datasets)
+# raw_train_dataset = raw_datasets["train"]
+# print(raw_train_dataset[0])
+# print(raw_train_dataset.features)
+#
+# from transformers import AutoTokenizer
+#
+# checkpoint = "bert-base-uncased"
+# tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+# tokenized_sentences1 = tokenizer(raw_datasets["train"]["sentence1"])
+# tokenized_sentences2 = tokenizer(raw_datasets["train"]["sentence2"])
+# inputs = tokenizer("This is the first sentence", "This is the second one")
+# print(inputs)
+# print(tokenizer.convert_ids_to_tokens(inputs["input_ids"]))
+#
+# tokenized_dataset = tokenizer(
+#     raw_datasets["train"]["sentence1"],
+#     raw_datasets["train"]["sentence2"],
+#     padding=True,
+#     truncation=True
+# )
+#
+#
+# def tokenize_function(example):
+#     return tokenizer(example["sentence1"], example["sentence2"], truncation=True)
+#
+# tokenized_datasets =raw_datasets.map(tokenize_function, batched=True)
+# print(tokenized_datasets)
+#
+# from transformers import DataCollatorWithPadding
+#
+# data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+#
+# samples = tokenized_datasets["train"][:8]
+# samples = {k: v for k, v in samples.items() if k not in ["idx", "sentence1", "sentence2"]}
+# print([len(x) for x in samples["input_ids"]])
+#
+# batch = data_collator(samples)
+# print({k: v.shape for k, v in batch.items()})
+
+# 2022.12.21
 from datasets import load_dataset
+from transformers import AutoTokenizer, DataCollatorWithPadding
 
 raw_datasets = load_dataset("glue", "mrpc")
-print(raw_datasets)
-raw_train_dataset = raw_datasets["train"]
-print(raw_train_dataset[0])
-print(raw_train_dataset.features)
-
-from transformers import AutoTokenizer
-
 checkpoint = "bert-base-uncased"
-tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-tokenized_sentences1 = tokenizer(raw_datasets["train"]["sentence1"])
-tokenized_sentences2 = tokenizer(raw_datasets["train"]["sentence2"])
-inputs = tokenizer("This is the first sentence", "This is the second one")
-print(inputs)
-print(tokenizer.convert_ids_to_tokens(inputs["input_ids"]))
 
-tokenized_dataset = tokenizer(
-    raw_datasets["train"]["sentence1"],
-    raw_datasets["train"]["sentence2"],
-    padding=True,
-    truncation=True
-)
+tokenizer =  AutoTokenizer.from_pretrained(checkpoint)
 
+def tokenize_function(entry):
+    return tokenizer(entry["sentence1"], entry["sentence2"], truncation=True)
 
-def tokenize_function(example):
-    return tokenizer(example["sentence1"], example["sentence2"], truncation=True)
-
-tokenized_datasets =raw_datasets.map(tokenize_function, batched=True)
-print(tokenized_datasets)
-
-from transformers import DataCollatorWithPadding
+tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-samples = tokenized_datasets["train"][:8]
-samples = {k: v for k, v in samples.items() if k not in ["idx", "sentence1", "sentence2"]}
-print([len(x) for x in samples["input_ids"]])
+from transformers import TrainingArguments
 
-batch = data_collator(samples)
-print({k: v.shape for k, v in batch.items()})
+training_args = TrainingArguments("test-trainer")
+
+from transformers import AutoModelForSequenceClassification
+
+model  =AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
+
+from transformers import Trainer
+
+# trainer = Trainer(
+#     model,
+#     training_args,
+#     train_dataset=tokenized_datasets["train"],
+#     eval_dataset=tokenized_datasets["validation"],
+#     data_collator=data_collator,
+#     tokenizer=tokenizer
+# )
+#
+# trainer.train()
+
+# predictions = trainer.predict(tokenized_datasets["validation"])
+# print(predictions.predictions.shape, predictions.label_ids.shape)
+# print(predictions.predictions.shape, predictions.label_ids)
+
+import numpy as np
+
+# preds = np.argmax(predictions.predictions, axis=-1)
+
+import evaluate
+
+# metric = evaluate.load("glue", "mrpc")
+# metric.compute(predictions=preds, references=predictions.label_ids)
+
+def compute_metrics(eval_preds):
+    metric = evaluate.load("glue", "mrpc")
+    logits,labels = eval_preds
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
+trainer = Trainer(
+    model,
+    training_args,
+    train_dataset=tokenized_datasets["train"],
+    eval_dataset=tokenized_datasets["validation"],
+    data_collator=data_collator,
+    tokenizer=tokenizer,
+    compute_metrics=compute_metrics,
+)
+
+trainer.train()
