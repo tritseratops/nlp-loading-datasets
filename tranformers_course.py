@@ -1,7 +1,13 @@
 import os
 
-os.environ['HF_HOME'] = 'e:/Large data/qa data/hf_home/'
-os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
+# DESKTOP
+# os.environ['HF_HOME'] = 'e:/Large data/qa data/hf_home/'
+# os.environ['TRANSFORMERS_CACHE'] = 'e:/Large data/qa data/transformers/cache/'
+
+#  for laptop
+os.environ['HF_HOME'] = 'd:/Large data/qa data/hf_home/'
+os.environ['TRANSFORMERS_CACHE'] = 'd:/Large data/qa data/transformers/cache/'
+
 
 # from transformers import AutoTokenizer
 #
@@ -214,5 +220,10 @@ trainer = Trainer(
     tokenizer=tokenizer,
     compute_metrics=compute_metrics,
 )
+
+import torch
+print("Torch cuda available: ",torch.cuda.is_available())
+import tensorflow as tf
+print("tensorflow GPU list: ", tf.config.list_physical_devices('GPU'))
 
 trainer.train()
