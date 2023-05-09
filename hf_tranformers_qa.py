@@ -114,7 +114,7 @@ if (offsets[token_start_index][0] <= start_char and offsets[token_end_index][1] 
 else:
     print("The answer is not in this feature.")
 
-# doublecheck if this is indeeed theoretical answer
+# doublecheck if this is indeed theoretical answer
 print(tokenizer.decode(tokenized_example["input_ids"][0][start_position: end_position+1]))
 print(answers["text"][0])
 
