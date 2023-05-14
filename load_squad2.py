@@ -10,11 +10,11 @@ print(datasets.__version__)
 from datasets import load_dataset, load_metric
 
 
-datasets = load_dataset("boolq")
+datasets = load_dataset("squad_v2")
 train_slice = datasets["train"]
-print(train_slice[0]["passage"])
-print(train_slice[1]["passage"])
-passages = train_slice["passage"]
+print(train_slice[0]["context"])
+print(train_slice[1]["context"])
+passages = train_slice["context"]
 
 lengths = list(map(len, passages))
 average_length = sum(lengths) / len(passages)
@@ -39,6 +39,8 @@ print("Average sentences per questions:", avg_sentences_per_question)
 word_counts = [len(sentence.split()) for question in questions for sentence in question.split('.')]
 avg_words_per_sentence = sum(word_counts) / len(word_counts)
 print("Average words per sentence in questions:", avg_words_per_sentence)
+
+
 
 exit()
 i=0
